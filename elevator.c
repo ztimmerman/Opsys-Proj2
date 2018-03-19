@@ -56,9 +56,14 @@ struct floor_info{
 }
 
 /*****************SYSCALLS************************/
-extern int(* STUB_start_elevator)(void);
-extern int(* STUB_issue_request)(int pass_type, int start_floor, int desired_floor);
-extern int(* STUB_stop_elevator)(void);
+/******START ELEVATOR*************/
+extern long(* STUB_start_elevator)(void);
+
+
+/******ISSUE REQUEST*************/
+extern long(* STUB_issue_request)(int pass_type, int start_floor, int desired_floor);
+/******STOP ELEVATOR*************/
+extern long(* STUB_stop_elevator)(void);
 
 /***********MODULE INITIALIZED************************/
 static int elevator_init(void){			//initializing elevator
