@@ -59,15 +59,30 @@ struct floor_info{
 /******START ELEVATOR*************/
 extern long(* STUB_start_elevator)(void);
 
+long start_elevator(void){
+
+	return 0;
+}
+
 
 /******ISSUE REQUEST*************/
 extern long(* STUB_issue_request)(int pass_type, int start_floor, int desired_floor);
+
+long issue_request(int pass_type, int start_floor, int desired_floor){
+
+	return 0;
+}
 /******STOP ELEVATOR*************/
 extern long(* STUB_stop_elevator)(void);
 
+long stop_elevator(void){
+
+	return 0;
+}
+
 /***********MODULE INITIALIZED************************/
 static int elevator_init(void){			//initializing elevator
-	elevator.state=IDLE;
+	elevator.state=OFFLINE;
 	elevator.currentFloor=BOTTOM_FLOOR;
 	elevator.passengers=0;
 	elevator.weight=0;
