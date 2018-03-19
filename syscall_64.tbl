@@ -1,3 +1,7 @@
+#################################################
+#	Added syscalls 333-335			#
+#	DILLON PRENDERGAST			#
+#################################################
 #
 # 64-bit system call numbers and entry vectors
 #

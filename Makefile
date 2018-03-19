@@ -1,4 +1,5 @@
 ifneq ($(KERNELRELEASE),)
+	obj-y :=elevator_calls.o
 	obj-m := elevator.o
 else
 	KERNELDIR ?= /lib/modules/`uname -r`/build/
