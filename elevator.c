@@ -75,6 +75,7 @@ static void elevator_exit(void){
 
 	elevator.deactivating=1;	//set bool to signal deactivation
 
+	elevator_syscalls_remove();
 	printk(KERN_ALERT"Elevator module de-initialized.\n");
 }
 module_init(elevator_init);
