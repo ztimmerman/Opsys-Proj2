@@ -3,6 +3,7 @@
 
 #include <linux/init.h>
 #include <linux/module.h>
+#include <syscalls.h>
 MODULE_LICENSE("Dual BSD/GPL");
 
 //defining the constants given in the project description
@@ -33,48 +34,47 @@ typedef enum{
 struct elevator_info{
 	elevator_state state;
 	int currentFloor;
+	int destination;
 	int passengers;
 	int weight;
+	bool deactivating;
 	bool goingUp;
 } elevator;
 
 //useful components of passenger info
 struct passenger_info{
 	int desination;
+	int currentFloor;
 	passenger_type type;
-};
+	bool goingUp;
+} passenger;
+
+//components of floor info
+struct floor_info{
+	int served;
+	int waiting;
+}
 
 /*****************SYSCALLS************************/
-int start_elevator(void){
+extern int(* STUB_start_elevator)(void);
+extern int(* STUB_issue_request)(int pass_type, int start_floor, int desired_floor);
+extern int(* STUB_stop_elevator)(void);
 
+/***********MODULE INITIALIZED************************/
+static int elevator_init(void){			//initializing elevator
 	elevator.state=IDLE;
 	elevator.currentFloor=BOTTOM_FLOOR;
 	elevator.passengers=0;
 	elevator.weight=0;
-	
-	return 0;
 
-}
-
-int issue_request(int passenger_type, int start_floor,
-		  int destination_floor){
-
-	return 0;
-}
-
-int stop_elevator(void){
-
-	return 0;
-}
-
-
-
-/***********MODULE INITIALIZED************************/
-static int elevator_init(void){
 	printk(KERN_ALERT"Elevator module initialized\n");
+	elevator_syscalls_create();
 	return 0;
 }
 static void elevator_exit(void){
+
+	elevator.deactivating=1;	//set bool to signal deactivation
+
 	printk(KERN_ALERT"Elevator module de-initialized.\n");
 }
 module_init(elevator_init);
