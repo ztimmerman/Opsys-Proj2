@@ -3,7 +3,6 @@
 
 #include <linux/init.h>
 #include <linux/module.h>
-#include <linux/syscalls.h>
 MODULE_LICENSE("Dual BSD/GPL");
 
 //defining the constants given in the project description
@@ -61,6 +60,7 @@ extern int(* STUB_start_elevator)(void);
 
 int start_elevator(void){
 
+	printk(KERN_ALERT"Start elevator\n");
 	return 0;
 }
 
@@ -69,6 +69,7 @@ int start_elevator(void){
 extern int(* STUB_issue_request)(int pass_type, int start_floor, int desired_floor);
 
 int issue_request(int pass_type, int start_floor, int desired_floor){
+	printk(KERN_ALERT"Issue request\n");
 
 	return 0;
 }
@@ -77,6 +78,7 @@ extern int(* STUB_stop_elevator)(void);
 
 int stop_elevator(void){
 
+	printk(KERN_ALERT"Stop elevator\n");
 	return 0;
 }
 
@@ -87,15 +89,19 @@ static int elevator_init(void){			//initializing elevator
 	elevator.passengers=0;
 	elevator.weight=0;
 
+	STUB_start_elevator=start_elevator;
+	STUB_issue_request=issue_request;
+	STUB_stop_elevator=stop_elevator;
+
 	printk(KERN_ALERT"Elevator module initialized\n");
-//	elevator_syscalls_create();
 	return 0;
 }
 static void elevator_exit(void){
 
-	elevator.deactivating=1;	//set bool to signal deactivation
-
-//	elevator_syscalls_remove();
+	STUB_start_elevator=NULL;
+	STUB_issue_request=NULL;
+	STUB_stop_elevator=NULL;
+	
 	printk(KERN_ALERT"Elevator module de-initialized.\n");
 }
 module_init(elevator_init);
