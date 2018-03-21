@@ -6,10 +6,10 @@
 #include <linux/syscalls.h>
 
 
-long (* STUB_start_elevator)(void) = NULL;
+int (* STUB_start_elevator)(void) = NULL;
 EXPORT_SYMBOL(STUB_start_elevator);
 
-asmlinkage long sys_start_elevator(void){
+asmlinkage int sys_start_elevator(void){
 
 	if(STUB_start_elevator !=NULL)
 		return STUB_start_elevator();
@@ -17,12 +17,12 @@ asmlinkage long sys_start_elevator(void){
 		return -ENOSYS;
 }
 
-long (* STUB_issue_request)(int passenger_type,int start_floor,
+int (* STUB_issue_request)(int passenger_type,int start_floor,
 			   int desired_floor) = NULL;
 EXPORT_SYMBOL(STUB_issue_request);
 
 
-asmlinkage long sys_issue_request(int passenger_type,int start_floor,
+asmlinkage int sys_issue_request(int passenger_type,int start_floor,
 				   int desired_floor){
 
 	if(STUB_issue_request !=NULL)
@@ -32,11 +32,11 @@ asmlinkage long sys_issue_request(int passenger_type,int start_floor,
 		return -ENOSYS;
 }
 
-long (* STUB_stop_elevator)(void) = NULL;
+int (* STUB_stop_elevator)(void) = NULL;
 EXPORT_SYMBOL(STUB_stop_elevator);
 
 
-asmlinkage long sys_stop_elevator(void){
+asmlinkage int sys_stop_elevator(void){
 
 	if(STUB_stop_elevator !=NULL)
 		return STUB_stop_elevator();

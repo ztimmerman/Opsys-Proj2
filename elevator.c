@@ -3,7 +3,7 @@
 
 #include <linux/init.h>
 #include <linux/module.h>
-#include <syscalls.h>
+#include <linux/syscalls.h>
 MODULE_LICENSE("Dual BSD/GPL");
 
 //defining the constants given in the project description
@@ -53,29 +53,29 @@ struct passenger_info{
 struct floor_info{
 	int served;
 	int waiting;
-}
+};
 
 /*****************SYSCALLS************************/
 /******START ELEVATOR*************/
-extern long(* STUB_start_elevator)(void);
+extern int(* STUB_start_elevator)(void);
 
-long start_elevator(void){
+int start_elevator(void){
 
 	return 0;
 }
 
 
 /******ISSUE REQUEST*************/
-extern long(* STUB_issue_request)(int pass_type, int start_floor, int desired_floor);
+extern int(* STUB_issue_request)(int pass_type, int start_floor, int desired_floor);
 
-long issue_request(int pass_type, int start_floor, int desired_floor){
+int issue_request(int pass_type, int start_floor, int desired_floor){
 
 	return 0;
 }
 /******STOP ELEVATOR*************/
-extern long(* STUB_stop_elevator)(void);
+extern int(* STUB_stop_elevator)(void);
 
-long stop_elevator(void){
+int stop_elevator(void){
 
 	return 0;
 }
@@ -88,14 +88,14 @@ static int elevator_init(void){			//initializing elevator
 	elevator.weight=0;
 
 	printk(KERN_ALERT"Elevator module initialized\n");
-	elevator_syscalls_create();
+//	elevator_syscalls_create();
 	return 0;
 }
 static void elevator_exit(void){
 
 	elevator.deactivating=1;	//set bool to signal deactivation
 
-	elevator_syscalls_remove();
+//	elevator_syscalls_remove();
 	printk(KERN_ALERT"Elevator module de-initialized.\n");
 }
 module_init(elevator_init);
