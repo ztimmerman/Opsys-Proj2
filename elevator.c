@@ -190,6 +190,16 @@ int stop_elevator(void){
 //IMPLEMENT ELEV SEARCHING ALGORITHM, PASS LOAD/UNLOAD
 int elevator_main(void * data){
 
+	//while IDLE, scan floors for waiting passengers
+	//When found
+	//Move to floor, LOADING passengers going UP or DOWN
+	//Move to furthest destination floor in UP or DOWN direection
+	//Check each floor, pick up passengers desiring same direction
+
+	//If space==0 and all floors empty IDLE
+	//if deactivating==1, unload passengers, do not pick up more
+	//Set OFFLINE when unloaded
+
 	elevator.state=OFFLINE;
 	kthread_stop(elevatorThread);
 
@@ -247,7 +257,7 @@ static void elevator_exit(void){
 
 	if(elevator.state!=OFFLINE){		//start shutting down elevator
 		elevator.deactivating=1;
-		kthread_stop(elevatorThread);
+		//kthread_stop(elevatorThread);
 		//sets deactivate to  1, then should wait until
 		//elevator_main completes (unsure)
 	}
