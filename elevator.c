@@ -187,6 +187,7 @@ int stop_elevator(void){
 }
 
 /********************************ELEVATOR_MAIN********************************/
+//IMPLEMENT ELEV SEARCHING ALGORITHM, PASS LOAD/UNLOAD
 int elevator_main(void * data){
 
 	elevator.state=OFFLINE;
@@ -196,7 +197,7 @@ int elevator_main(void * data){
 }
 
 /************************************PROC*************************************/
-
+//SET UP PROC FILE WITH FORMAT GIVEN IN DESCRIPTION
 
 
 /**************************************MODULE*********************************/
@@ -247,6 +248,8 @@ static void elevator_exit(void){
 	if(elevator.state!=OFFLINE){		//start shutting down elevator
 		elevator.deactivating=1;
 		kthread_stop(elevatorThread);
+		//sets deactivate to  1, then should wait until
+		//elevator_main completes (unsure)
 	}
 	
 	mutex_unlock(&elevatorLock);
