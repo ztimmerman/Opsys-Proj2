@@ -86,7 +86,7 @@ extern int(* STUB_start_elevator)(void);
 
 int start_elevator(void){
 
-	mutex_lock(&elevatorLock);	
+	mutex_lock(&elevatorLock);
 	//lock elevator
 
 	if(elevator.state==OFFLINE){		//if the elevator is OFFLINE
@@ -102,6 +102,7 @@ int start_elevator(void){
 		//create a thread for the main elevator function
 		//if successfull thread will run elevator_main()
 		elevatorThread=kthread_run(elevator_main,NULL,"elevator_main");
+			printk(KERN_ALERT"Thread actually started");
 
 		//if thread failed to create
 		if(IS_ERR(elevatorThread) !=0){
@@ -110,6 +111,7 @@ int start_elevator(void){
 			return -ENOMEM;
 		}
 		else{	//thread created succesfully
+			printk(KERN_ALERT"Thread still going");
 			mutex_unlock(&elevatorLock);
 			return 0;
 		}
@@ -214,6 +216,7 @@ int find_weight(passenger_type p) {
 void set_state(void) {					// figure out if the elevator is going up or down and set state accordingly
 	if (elevator.destination > elevator.currentFloor) { elevator.state = UP; }
 	else {elevator.state = DOWN;}
+	if(elevator.currentFloor == BOTTOM_FLOOR){elevator.state = UP;}
 }
 
 void set_destination(void) {
@@ -233,7 +236,8 @@ void set_destination(void) {
 			elevator.destination = pass->destination;
 		}
 	}
-
+	if(elevator.destination < BOTTOM_FLOOR){elevator.destination = BOTTOM_FLOOR;}
+	if(elevator.destination > TOP_FLOOR){elevator.destination = TOP_FLOOR;}
 	set_state();
 }
 
@@ -250,27 +254,41 @@ void load_elevator(void) {					// loads the elevator on the current floor
 	else if (elevator.state == DOWN){goingup = false;}
 
 	elevator.state = LOADING;
-	// wait for 1.0 seconds *********************
+	// wait for 1.0 seconds
 	msleep(1000);
 
-
+/*
 	if (elevator.space == 0) {	// if no one is in the elevator, we don't need to check the direction for the first passenger.
 		pass = list_entry(&floors[elevator.currentFloor].queue, struct passenger_info, passengerList);
 		list_move_tail(&floors[elevator.currentFloor].queue, &elevator.queue);		// move the first passenger on the floor into the elevator
+		floors[elevator.currentFloor].waiting--;
 		elevator.destination = pass->destination;
 		elevator.space += find_size(pass->type);
 		elevator.weight += find_weight(pass->type);
 		goingup = pass->goingUp;
 	}
+	set_state();*/
+	if (floors[elevator.currentFloor].waiting == 0) { return; }							// do nothing if there's no one to load.
+
 
 	// load everyone on the currentFloor going in the same direction, that there is space for
 	list_for_each_safe(temp, dummy, &floors[elevator.currentFloor].queue) {
 		pass = list_entry(temp, struct passenger_info, passengerList);
-		if (pass->goingUp == goingup) {
+		if(elevator.space ==0){
+		list_move_tail(temp, &elevator.queue);
+		goingup = pass->goingUp;
+		elevator.destination = pass->destination;
+		elevator.space += find_size(pass->type);
+		elevator.weight += find_weight(pass->type);
+		floors[elevator.currentFloor].waiting--;
+
+		}
+		else if (pass->goingUp == goingup) {
 			if (find_size(pass->type) + elevator.space <= MAX_PASSENGER) {
 				if ((find_weight(pass->type) + elevator.weight)/10 <= MAX_WEIGHT) {
 					// the passenger qualifies. Move them to the elevator. Check if their destination is closer than the current one.
 					list_move_tail(temp, &elevator.queue);
+					floors[elevator.currentFloor].waiting--;
 					if ((goingup && pass->destination < elevator.destination) | (!goingup && pass->destination > elevator.destination)) 
 					{ elevator.destination = pass->destination; }	// if the new passenger's destination is closer, we're going there first.
 				}
@@ -286,6 +304,7 @@ void unload_elevator(void) {
 	struct list_head * dummy;
 	struct passenger_info * pass;
 	if (elevator.currentFloor != elevator.destination) { return; }			// if this isn't the destination floor, do not unload.
+	if (elevator.space == 0){return;}
 	// wait 1.0 seconds*************************************
 	msleep(1000);
 	// for everyone in the elevator, if their destination is the currentFloor, get them 
@@ -295,7 +314,7 @@ void unload_elevator(void) {
 		// get entry for pass. If destination == currentFloor, get them out
 		pass = list_entry(temp, struct passenger_info, passengerList);
 		if (pass->destination == elevator.currentFloor) {
-			floors[pass->currentFloor].served++;
+			floors[pass->currentFloor -1].served++;
 			// remove pass's weight and size from the elevator
 			elevator.space -= find_size(pass->type);
 			elevator.weight -= find_weight(pass->type);
@@ -322,17 +341,20 @@ void seek_destination(void) {							// call this when the elevator is empty and 
 /********************************ELEVATOR_MAIN********************************/
 //IMPLEMENT ELEV SEARCHING ALGORITHM, PASS LOAD/UNLOAD
 int elevator_main(void * data) {
+			printk(KERN_ALERT"Jumped to main");
+
 	while (true) {
-		while (elevator.deactivating == 0) {
+			printk(KERN_ALERT"Start of main loop");
+		//while (elevator.deactivating == 0) {
 			//while IDLE, scan floors for waiting passengers
-			while (elevator.state == IDLE) {
+			while (elevator.state == IDLE && elevator.deactivating == 0) {
 				load_elevator();
 				
 				if (elevator.state == IDLE) {		// if there were no passengers from this floor, look for people on other floors.
 					seek_destination();
 				}
 			}
-		}
+		//}
 
 		//If space==0, seek a new passengers. If none are found, set to IDLE
 		if (elevator.space == 0) {
@@ -341,8 +363,12 @@ int elevator_main(void * data) {
 
 		// Move one floor at a time towards elevator.destination
 		// wait two seconds *************************************
-		if (elevator.state == UP) { elevator.currentFloor++; msleep(2000);}
-		if (elevator.state == DOWN) {elevator.currentFloor--;msleep(2000);}
+		if (elevator.state == UP) { elevator.currentFloor++; 
+			msleep(2000);
+			}
+		if (elevator.state == DOWN) {elevator.currentFloor--;
+			msleep(2000);
+			}
 		if(elevator.destination == elevator.currentFloor)unload_elevator();
 		load_elevator();		//Check each floor, pick up passengers desiring same direction if deactivating == 0 and there is space
 
@@ -351,10 +377,12 @@ int elevator_main(void * data) {
 		//if deactivating==1, unload passengers, do not pick up more (handled through while loop near the top)
 		//Set OFFLINE when unloaded
 		if (elevator.space == 0 && elevator.deactivating == 1) {
+			printk(KERN_ALERT "SETTING OFFLINE");
 			elevator.state = OFFLINE;
 			kthread_stop(elevatorThread);
 		}
 	}
+	//kthread_stop(elevatorThread);
 	return 0;
 }
 
