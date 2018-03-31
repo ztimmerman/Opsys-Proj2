@@ -117,7 +117,7 @@ $> make clean
 		      BUGS
 **************************************************
 
--
+-Intermittent issue where keyboard completely locked
 
 **************************************************
 		UNFINISHED PORTIONS
