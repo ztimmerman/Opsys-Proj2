@@ -248,7 +248,7 @@ void load_elevator(void) {					// loads the elevator on the current floor
 	struct passenger_info * pass;
 	if (elevator.deactivating == 1) {return;}											// No one can enter the elevator while it is deactivating.
 	if ((elevator.space == MAX_PASSENGER) | ((elevator.weight/10) == MAX_WEIGHT)) { return; }		// do nothing if the elevator is full.
-	if (floors[elevator.currentFloor].waiting == 0) { return; }							// do nothing if there's no one to load.
+	if (floors[elevator.currentFloor - 1].waiting == 0) { return; }							// do nothing if there's no one to load.
 
 	if (elevator.state == UP) {goingup = true;}
 	else if (elevator.state == DOWN){goingup = false;}
@@ -257,46 +257,38 @@ void load_elevator(void) {					// loads the elevator on the current floor
 	// wait for 1.0 seconds
 	msleep(1000);
 
-/*
-	if (elevator.space == 0) {	// if no one is in the elevator, we don't need to check the direction for the first passenger.
-		pass = list_entry(&floors[elevator.currentFloor].queue, struct passenger_info, passengerList);
-		list_move_tail(&floors[elevator.currentFloor].queue, &elevator.queue);		// move the first passenger on the floor into the elevator
-		floors[elevator.currentFloor].waiting--;
-		elevator.destination = pass->destination;
-		elevator.space += find_size(pass->type);
-		elevator.weight += find_weight(pass->type);
-		goingup = pass->goingUp;
-	}
-	set_state();*/
-	if (floors[elevator.currentFloor].waiting == 0) { return; }							// do nothing if there's no one to load.
+	if (floors[elevator.currentFloor - 1].waiting == 0) { return; }							// do nothing if there's no one to load.
 
 
 	// load everyone on the currentFloor going in the same direction, that there is space for
-	list_for_each_safe(temp, dummy, &floors[elevator.currentFloor].queue) {
+	list_for_each_safe(temp, dummy, &floors[elevator.currentFloor - 1].queue) {
 		pass = list_entry(temp, struct passenger_info, passengerList);
-		if(elevator.space ==0){
-		list_move_tail(temp, &elevator.queue);
-		goingup = pass->goingUp;
-		elevator.destination = pass->destination;
-		elevator.space += find_size(pass->type);
-		elevator.weight += find_weight(pass->type);
-		floors[elevator.currentFloor].waiting--;
-
+		if((elevator.space == 0 && elevator.currentFloor == elevator.destination) | (elevator.space == 0 && goingup == pass->goingUp) ){
+			list_move_tail(temp, &elevator.queue);
+			goingup = pass->goingUp;
+			elevator.destination = pass->destination;
+			elevator.space += find_size(pass->type);
+			elevator.weight += find_weight(pass->type);
+			floors[elevator.currentFloor - 1].waiting--;
 		}
 		else if (pass->goingUp == goingup) {
 			if (find_size(pass->type) + elevator.space <= MAX_PASSENGER) {
 				if ((find_weight(pass->type) + elevator.weight)/10 <= MAX_WEIGHT) {
 					// the passenger qualifies. Move them to the elevator. Check if their destination is closer than the current one.
 					list_move_tail(temp, &elevator.queue);
-					floors[elevator.currentFloor].waiting--;
-					if ((goingup && pass->destination < elevator.destination) | (!goingup && pass->destination > elevator.destination)) 
-					{ elevator.destination = pass->destination; }	// if the new passenger's destination is closer, we're going there first.
+					elevator.space += find_size(pass->type);
+					elevator.weight += find_weight(pass->type);
+
+					floors[elevator.currentFloor - 1].waiting--;
+					if(elevator.space != 0){
+						if ((goingup && pass->destination < elevator.destination) | (!goingup && pass->destination > elevator.destination)) 
+						{ elevator.destination = pass->destination; }}	// if the new passenger's destination is closer, we're going there first.
 				}
 			}
 		}
 	}
 
-	set_state();	
+	set_state();
 }
 
 void unload_elevator(void) {
@@ -306,6 +298,7 @@ void unload_elevator(void) {
 	if (elevator.currentFloor != elevator.destination) { return; }			// if this isn't the destination floor, do not unload.
 	if (elevator.space == 0){return;}
 	// wait 1.0 seconds*************************************
+	elevator.state = LOADING;
 	msleep(1000);
 	// for everyone in the elevator, if their destination is the currentFloor, get them 
 
