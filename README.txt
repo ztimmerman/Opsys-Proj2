@@ -46,7 +46,7 @@ John Thomas Lascha
 		TAR ARCHIVE CONTENTS
 **************************************************
 
-project1_prendergast_timmerman.tar contents:
+project2_lascha_prendergast_timmerman.tar contents:
 
 README.txt
 elevator directory:
@@ -117,13 +117,15 @@ $> make clean
 		      BUGS
 **************************************************
 
--
+-If elevator is started then immediately closed without
+ letting on any passengers, system shows unintended behavior
+ and module is removed.
 
 **************************************************
 		UNFINISHED PORTIONS
 **************************************************
 
--Testing the elevator
+-Optimizing elevator for fastest behavior
 
 **************************************************
 		     COMMENTS
