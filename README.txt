@@ -33,6 +33,7 @@ Zachary Timmerman
   -part3
 	-syscalls
 	-debugging
+  -README.txt
 
 John Thomas Lascha
   -part1
@@ -48,13 +49,13 @@ John Thomas Lascha
 project1_prendergast_timmerman.tar contents:
 
 README.txt
-elevator directory:	
-	-makefile	
+elevator directory:
+	-Makefile
 	-elevator.c		//main program with implemented functions
 	-elevator_calls.c	//linking of syscalls
-xtime directory:
-	-xtime
-	-makefile
+part2 directory:
+	-my_xtime
+	-Makefile
 part1 directory:
 	-part1.c
 
@@ -73,24 +74,24 @@ gcc version 5.4.0
 Part1:
 
 To make:
-$> gcc part1.c
+$> gcc -o part1.x part1.c
 
 To run:
-$> ./a.out
+$> strace -o log ./part1.x
 
-Xtime:
+my_xtime:
 
 To make:
-$> make xtime.c
+$> make my_xtime.c
 
 To insert module:
-$> sudo insmod xtime.ko
+$> sudo insmod my_xtime.ko
 
 To view proc file:
 $> cat /proc/timed
 
 To remove module:
-$> sudo rmmod xtime
+$> sudo rmmod my_xtime
 
 To clean directory:
 $> make clean
@@ -127,4 +128,3 @@ $> make clean
 **************************************************
 		     COMMENTS
 **************************************************
-
