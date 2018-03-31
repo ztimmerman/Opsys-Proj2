@@ -125,7 +125,7 @@ $> make clean
 		UNFINISHED PORTIONS
 **************************************************
 
--Testing the elevator
+-Optimizing elevator for fastest behavior
 
 **************************************************
 		     COMMENTS
