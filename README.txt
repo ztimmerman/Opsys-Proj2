@@ -117,9 +117,7 @@ $> make clean
 		      BUGS
 **************************************************
 
--If elevator is started then immediately closed without
- letting on any passengers, system shows unintended behavior
- and module is removed.
+-
 
 **************************************************
 		UNFINISHED PORTIONS
